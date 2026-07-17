@@ -12,7 +12,7 @@
 const RALAT_TEXT = 'RALAT';
 const DEFAULT_ERROR = 'RALAT: input tidak sah.';
 const LOCALE = 'ms-MY';
-const HISTORY_LIMIT = 4;
+const HISTORY_LIMIT = 5;
 
 /* ----------------------------------------------------------------------- */
 /*  Shared math helpers                                                    */
@@ -63,6 +63,30 @@ function splitCommaList(raw) {
   return raw.split(',').map((t) => t.trim()).filter((t) => t.length > 0);
 }
 
+function normalizeListInput(raw, cursorStart, cursorEnd) {
+  let value = raw;
+  let start = cursorStart;
+  let end = cursorEnd;
+
+  const beforeLen = value.length;
+
+  value = value.replace(/\s*\/\s*/g, '/');
+  value = value.replace(/[,\s]+/g, ', ');
+  value = value.replace(/, $/, ',');
+
+  const afterLen = value.length;
+  const delta = afterLen - beforeLen;
+
+  start = Math.max(0, start + delta);
+  end = Math.max(0, end + delta);
+
+  return { value, cursorStart: start, cursorEnd: end };
+}
+
+function finalizeListInput(raw) {
+  return raw.replace(/,\s*$/, '');
+}
+
 function setError(el, message) {
   el.textContent = message || '';
   el.classList.toggle('hidden', !message);
@@ -100,6 +124,9 @@ function loadHistory(key) {
  */
 function pushHistory(key, entry) {
   const history = loadHistory(key);
+  if (history.length > 0 && history[0] === entry) {
+    return history;
+  }
   history.unshift(entry);
   const trimmed = history.slice(0, HISTORY_LIMIT);
   try {
@@ -301,6 +328,8 @@ function calculateAsalMasalah() {
   setError(c2.error, null);
 
   try {
+    c2.nisbah.value = finalizeListInput(c2.nisbah.value);
+    c2.waris.value = finalizeListInput(c2.waris.value);
     const ratios = parseRatios(c2.nisbah.value);
     const heirCount = parseHeirCount(c2.waris.value);
 
@@ -365,5 +394,21 @@ const calc2 = setupCalculator({
   btnEl: c2.btn,
 });
 calc2.init();
+
+function attachListNormalizer(inputEl) {
+  inputEl.addEventListener('input', (e) => {
+    const raw = inputEl.value;
+    const start = inputEl.selectionStart;
+    const end = inputEl.selectionEnd;
+    const result = normalizeListInput(raw, start, end);
+    if (result.value !== raw) {
+      inputEl.value = result.value;
+      inputEl.setSelectionRange(result.cursorStart, result.cursorEnd);
+    }
+  });
+}
+
+attachListNormalizer(c2.nisbah);
+attachListNormalizer(c2.waris);
 
 
