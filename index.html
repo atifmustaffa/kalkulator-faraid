@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#22303A" />
 <title>Kira Asal Masalah — Kalkulator Faraid</title>
-<link rel="icon" type="image/svg+xml" href="favicon.png">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
+<link rel="manifest" href="favicon/site.webmanifest">
+<link rel="apple-touch-icon" href="favicon/apple-touch-icon.png">
 
 <!-- Tailwind CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
@@ -254,5 +257,10 @@
   </footer>
 
   <script src="main.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
 </body>
 </html>
