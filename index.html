@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kira Asal Masalah — Kalkulator Faraid</title>
+<link rel="icon" type="image/svg+xml" href="favicon.png">
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Fonts: Lora (ledger-style serif for headings), Inter (UI text), JetBrains Mono (numeric results) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          paper: '#F6F1E4',
+          card: '#FFFDF6',
+          ink: '#22303A',
+          inkfaint: '#5B6B74',
+          brass: '#A87C2A',
+          brassdark: '#8A6620',
+          highlight: '#EFE6C8',
+          err: '#A6392D',
+        },
+        fontFamily: {
+          serif: ['Lora', 'serif'],
+          sans: ['Inter', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  /* Hairline double-rule divider, evokes a ledger page header */
+  .double-rule {
+    border-top: 2px solid #A87C2A;
+    border-bottom: 1px solid #A87C2A;
+    height: 4px;
+  }
+  /* Ledger card: soft paper card with a faint corner tick to feel like a record sheet, not a generic rounded box */
+  .ledger-card {
+    background-color: #FFFDF6;
+    border: 1px solid rgba(34, 48, 58, 0.14);
+    box-shadow: 0 1px 0 rgba(34,48,58,0.05);
+    position: relative;
+  }
+  .ledger-card::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 10px;
+    height: 10px;
+    border-top: 2px solid #A87C2A;
+    border-left: 2px solid #A87C2A;
+  }
+  .ledger-card::after {
+    content: '';
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 10px;
+    height: 10px;
+    border-bottom: 2px solid #A87C2A;
+    border-right: 2px solid #A87C2A;
+  }
+  input:focus-visible, button:focus-visible {
+    outline: 2px solid #A87C2A;
+    outline-offset: 2px;
+  }
+  .result-fade-in {
+    animation: fadeIn 0.25s ease-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(2px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+
+<body class="bg-paper text-ink font-sans min-h-screen">
+
+  <!-- ===== Header ===== -->
+  <header class="max-w-5xl mx-auto px-6 pt-12 pb-6 text-center">
+    <p class="uppercase tracking-[0.25em] text-xs text-brassdark font-medium mb-2">Kalkulator Faraid</p>
+    <h1 class="font-serif font-semibold text-3xl sm:text-4xl text-ink">Kira Asal Masalah</h1>
+    <div class="double-rule w-24 mx-auto mt-4 mb-3"></div>
+    <p class="text-inkfaint text-sm max-w-md mx-auto">Kalkulator faktor sepunya (FST) dan asal masalah (GSTK) untuk pengiraan faraid.</p>
+  </header>
+
+  <!-- ===== Main grid: two calculation cards ===== -->
+  <main class="max-w-5xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+    <!-- ============ CARD I: Faktor Sepunya (FST) ============ -->
+    <section class="flex flex-col gap-4">
+      <div class="ledger-card rounded-sm p-6 sm:p-7">
+        <div class="flex items-baseline gap-2 mb-1">
+          <span class="font-serif text-brass font-semibold text-sm">I.</span>
+          <h2 class="font-serif font-semibold text-xl text-ink">Faktor Sepunya</h2>
+        </div>
+        <p class="text-inkfaint text-xs mb-5">Cari faktor bagi dua nilai menggunakan gandaan sepunya terbesar (FST).</p>
+
+        <div class="grid grid-cols-2 gap-4 mb-2">
+          <div>
+            <label for="c1-nilai1" class="block text-xs font-medium text-inkfaint mb-1.5">Nilai 1 (<abbr title="Si Mati">SM</abbr>)</label>
+            <input
+              id="c1-nilai1"
+              type="number"
+              inputmode="numeric"
+              min="1"
+              step="1"
+              placeholder="cth: 14"
+              class="w-full rounded-sm border border-ink/20 bg-white px-3 py-2.5 text-ink font-mono text-sm focus:border-brass focus:ring-1 focus:ring-brass outline-none transition"
+            />
+          </div>
+          <div>
+            <label for="c1-nilai2" class="block text-xs font-medium text-inkfaint mb-1.5">Nilai 2</label>
+            <input
+              id="c1-nilai2"
+              type="number"
+              inputmode="numeric"
+              min="1"
+              step="1"
+              placeholder="cth: 192"
+              class="w-full rounded-sm border border-ink/20 bg-white px-3 py-2.5 text-ink font-mono text-sm focus:border-brass focus:ring-1 focus:ring-brass outline-none transition"
+            />
+          </div>
+        </div>
+
+        <p id="c1-error" class="text-err text-xs mb-2 hidden"></p>
+
+        <button
+          id="c1-btn"
+          class="w-full bg-ink hover:bg-ink/90 active:bg-ink text-paper text-sm font-medium py-2.5 rounded-sm transition mb-5"
+        >
+          Kira Faktor
+        </button>
+
+        <!-- Results -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-highlight/60 rounded-sm px-3 py-3 text-center">
+            <p id="c1-hasil1" class="font-mono text-xl font-bold text-ink">—</p>
+            <p class="text-[11px] text-inkfaint mt-1">Faktor 1</p>
+          </div>
+          <div class="bg-highlight/60 rounded-sm px-3 py-3 text-center">
+            <p id="c1-hasil2" class="font-mono text-xl font-bold text-ink">—</p>
+            <p class="text-[11px] text-inkfaint mt-1">Faktor 2</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- History card for Kalkulator I -->
+      <div class="ledger-card rounded-sm p-5">
+        <p class="text-[11px] uppercase tracking-wider text-brassdark font-medium mb-3">Sejarah Pengiraan</p>
+        <ul id="c1-history" class="text-sm font-mono text-ink/80 divide-y divide-ink/10">
+          <!-- Populated by main.js -->
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ CARD II: Asal Masalah (GSTK) ============ -->
+    <section class="flex flex-col gap-4">
+      <div class="ledger-card rounded-sm p-6 sm:p-7">
+        <div class="flex items-baseline gap-2 mb-1">
+          <span class="font-serif text-brass font-semibold text-sm">II.</span>
+          <h2 class="font-serif font-semibold text-xl text-ink">Asal Masalah</h2>
+        </div>
+        <p class="text-inkfaint text-xs mb-5">Cari asal masalah akhir menggunakan gandaan sepunya terkecil (GSTK) dan baki bahagian waris asabah.</p>
+
+        <div class="mb-4">
+          <label for="c2-nisbah" class="block text-xs font-medium text-inkfaint mb-1.5">Nisbah Waris</label>
+          <input
+            id="c2-nisbah"
+            type="text"
+            placeholder="cth: 1/6, 1/8"
+            class="w-full rounded-sm border border-ink/20 bg-white px-3 py-2.5 text-ink font-mono text-sm focus:border-brass focus:ring-1 focus:ring-brass outline-none transition"
+          />
+          <p class="text-[11px] text-inkfaint mt-1.5">Dipisahkan dengan koma.</p>
+        </div>
+
+        <div class="mb-2">
+          <label for="c2-waris" class="block text-xs font-medium text-inkfaint mb-1.5">Bahagian Waris Asabah (Baki)</label>
+          <input
+            id="c2-waris"
+            type="text"
+            placeholder="cth: 8  atau  2, 2, 1, 1"
+            class="w-full rounded-sm border border-ink/20 bg-white px-3 py-2.5 text-ink font-mono text-sm focus:border-brass focus:ring-1 focus:ring-brass outline-none transition"
+          />
+          <p class="text-[11px] text-inkfaint mt-1.5">Masukkan jumlah terus (cth: <span class="font-mono">8</span>), atau senarai pemberat dipisahkan dengan koma (cth: anak lelaki=2, anak perempuan=1 → <span class="font-mono">2,2,1,1</span>) — akan dijumlahkan secara automatik.</p>
+        </div>
+
+        <p id="c2-error" class="text-err text-xs mb-2 hidden"></p>
+
+        <button
+          id="c2-btn"
+          class="w-full bg-ink hover:bg-ink/90 active:bg-ink text-paper text-sm font-medium py-2.5 rounded-sm transition mb-5 mt-2"
+        >
+          Kira Asal Masalah
+        </button>
+
+        <!-- Step-by-step results -->
+        <div class="space-y-2 mb-4">
+          <div class="flex items-center justify-between bg-white border border-ink/10 rounded-sm px-3 py-2">
+            <span class="text-xs text-inkfaint">Asas GSTK</span>
+            <span id="c2-lcm" class="font-mono text-sm font-semibold text-ink">—</span>
+          </div>
+          <div class="flex items-center justify-between bg-white border border-ink/10 rounded-sm px-3 py-2">
+            <span class="text-xs text-inkfaint">Digunakan (nisbah × asas)</span>
+            <span id="c2-used" class="font-mono text-sm font-semibold text-ink">—</span>
+          </div>
+          <div class="flex items-center justify-between bg-white border border-ink/10 rounded-sm px-3 py-2">
+            <span class="text-xs text-inkfaint">Baki Unit</span>
+            <span id="c2-remain" class="font-mono text-sm font-semibold text-ink">—</span>
+          </div>
+          <div class="flex items-center justify-between bg-white border border-ink/10 rounded-sm px-3 py-2">
+            <span class="text-xs text-inkfaint">Bahagian Waris Asabah</span>
+            <span id="c2-heircount" class="font-mono text-sm font-semibold text-ink">—</span>
+          </div>
+        </div>
+
+        <div class="bg-highlight/60 rounded-sm px-3 py-4 text-center">
+          <p id="c2-final" class="font-mono text-2xl font-bold text-ink">—</p>
+          <p class="text-[11px] text-inkfaint mt-1">Asal Masalah Akhir</p>
+        </div>
+      </div>
+
+      <!-- History card for Kalkulator II -->
+      <div class="ledger-card rounded-sm p-5">
+        <p class="text-[11px] uppercase tracking-wider text-brassdark font-medium mb-3">Sejarah Pengiraan</p>
+        <ul id="c2-history" class="text-sm font-mono text-ink/80 divide-y divide-ink/10">
+          <!-- Populated by main.js -->
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="text-center pb-12 text-[11px] text-inkfaint">
+    * Sejarah pengiraan disimpan secara tempatan di pelayar anda sahaja.
+  </div>
+
+  <footer class="text-center pb-10 text-[12px] text-inkfaint">
+    &copy; 2026 Developed by Atif Mustaffa • MIT License • Source on <a
+    class="text-inkfaint underline"
+    href="https://github.com/atifmustaffa/js-env-tool-web"
+    rel="noopener noreferrer">GitHub</a>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
