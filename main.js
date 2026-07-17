@@ -13,6 +13,68 @@ const RALAT_TEXT = 'RALAT';
 const DEFAULT_ERROR = 'RALAT: input tidak sah.';
 const LOCALE = 'ms-MY';
 const HISTORY_LIMIT = 5;
+const THEME_KEY = 'kiraFaraid.theme';
+
+function getStoredTheme() {
+  try {
+    const raw = localStorage.getItem(THEME_KEY);
+    return raw === 'light' || raw === 'dark' ? raw : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function getSystemTheme() {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function getEffectiveTheme() {
+  return getStoredTheme() || getSystemTheme();
+}
+
+function applyTheme(theme) {
+  const isDark = theme === 'dark';
+  document.documentElement.classList.toggle('dark', isDark);
+
+  const toggleBtn = document.getElementById('theme-toggle');
+  if (toggleBtn) {
+    toggleBtn.setAttribute('aria-pressed', String(isDark));
+    toggleBtn.setAttribute('aria-label', isDark ? 'Tukar tema terang' : 'Tukar tema gelap');
+  }
+
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) {
+    metaTheme.setAttribute('content', isDark ? '#1A1612' : '#22303A');
+  }
+}
+
+function setTheme(theme) {
+  applyTheme(theme);
+  try {
+    localStorage.setItem(THEME_KEY, theme);
+  } catch (e) {
+    console.error('Gagal menyimpan tema:', e);
+  }
+}
+
+function initTheme() {
+  applyTheme(getEffectiveTheme());
+
+  const toggleBtn = document.getElementById('theme-toggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const next = getEffectiveTheme() === 'dark' ? 'light' : 'dark';
+      setTheme(next);
+    });
+  }
+
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  mediaQuery.addEventListener('change', () => {
+    if (!getStoredTheme()) {
+      applyTheme(getSystemTheme());
+    }
+  });
+}
 
 /* ----------------------------------------------------------------------- */
 /*  Shared math helpers                                                    */
@@ -153,7 +215,7 @@ function renderHistory(listEl, history) {
     li.className = 'py-2 flex items-center justify-between gap-3';
 
     const label = document.createElement('span');
-    label.className = 'text-[11px] text-inkfaint font-sans shrink-0';
+    label.className = 'text-[11px] text-inkfaint dark:text-inkfaint-dark font-sans shrink-0';
     label.textContent = labels[i] || '';
 
     const value = document.createElement('span');
@@ -410,5 +472,7 @@ function attachListNormalizer(inputEl) {
 
 attachListNormalizer(c2.nisbah);
 attachListNormalizer(c2.waris);
+
+initTheme();
 
 

@@ -9,6 +9,18 @@
 <link rel="manifest" href="favicon/site.webmanifest">
 <link rel="apple-touch-icon" href="favicon/apple-touch-icon.png">
 
+<script>
+  (function () {
+    try {
+      const stored = localStorage.getItem('kiraFaraid.theme');
+      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (stored === 'dark' || (!stored && systemDark)) {
+        document.documentElement.classList.add('dark');
+      }
+    } catch (e) {}
+  })();
+</script>
+
 <!-- Tailwind CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -18,17 +30,26 @@
 
 <script>
   tailwind.config = {
+    darkMode: 'class',
     theme: {
       extend: {
         colors: {
           paper: '#F6F1E4',
+          'paper-dark': '#1A1612',
           card: '#FFFDF6',
+          'card-dark': '#231F1A',
           ink: '#22303A',
+          'ink-dark': '#E8DDD0',
           inkfaint: '#5B6B74',
+          'inkfaint-dark': '#8A7D6E',
           brass: '#A87C2A',
+          'brass-dark': '#D4A84B',
           brassdark: '#8A6620',
+          'brassdark-dark': '#B8923A',
           highlight: '#EFE6C8',
+          'highlight-dark': '#3D3428',
           err: '#A6392D',
+          'err-dark': '#D96B5F',
         },
         fontFamily: {
           serif: ['Lora', 'serif'],
@@ -41,17 +62,30 @@
 </script>
 
 <style>
-  /* Hairline double-rule divider, evokes a ledger page header */
+  :root {
+    --card: #FFFDF6;
+    --card-border: rgba(34, 48, 58, 0.14);
+    --card-shadow: rgba(34, 48, 58, 0.05);
+    --brass: #A87C2A;
+    --focus-outline: #A87C2A;
+  }
+  html.dark {
+    --card: #231F1A;
+    --card-border: rgba(232, 221, 208, 0.14);
+    --card-shadow: rgba(0, 0, 0, 0.15);
+    --brass: #D4A84B;
+    --focus-outline: #D4A84B;
+  }
+
   .double-rule {
-    border-top: 2px solid #A87C2A;
-    border-bottom: 1px solid #A87C2A;
+    border-top: 2px solid var(--brass);
+    border-bottom: 1px solid var(--brass);
     height: 4px;
   }
-  /* Ledger card: soft paper card with a faint corner tick to feel like a record sheet, not a generic rounded box */
   .ledger-card {
-    background-color: #FFFDF6;
-    border: 1px solid rgba(34, 48, 58, 0.14);
-    box-shadow: 0 1px 0 rgba(34,48,58,0.05);
+    background-color: var(--card);
+    border: 1px solid var(--card-border);
+    box-shadow: 0 1px 0 var(--card-shadow);
     position: relative;
   }
   .ledger-card::before {
@@ -61,8 +95,8 @@
     left: 10px;
     width: 10px;
     height: 10px;
-    border-top: 2px solid #A87C2A;
-    border-left: 2px solid #A87C2A;
+    border-top: 2px solid var(--brass);
+    border-left: 2px solid var(--brass);
   }
   .ledger-card::after {
     content: '';
@@ -71,11 +105,11 @@
     right: 10px;
     width: 10px;
     height: 10px;
-    border-bottom: 2px solid #A87C2A;
-    border-right: 2px solid #A87C2A;
+    border-bottom: 2px solid var(--brass);
+    border-right: 2px solid var(--brass);
   }
   input:focus-visible, button:focus-visible {
-    outline: 2px solid #A87C2A;
+    outline: 2px solid var(--focus-outline);
     outline-offset: 2px;
   }
   .result-fade-in {
@@ -85,17 +119,40 @@
     from { opacity: 0; transform: translateY(2px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
+  #theme-toggle svg {
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #theme-toggle svg {
+      transition: none;
+    }
+  }
 </style>
 </head>
 
-<body class="bg-paper text-ink font-sans min-h-screen">
+<body class="bg-paper dark:bg-paper-dark text-ink dark:text-ink-dark font-sans min-h-screen">
 
   <!-- ===== Header ===== -->
-  <header class="max-w-5xl mx-auto px-6 pt-12 pb-6 text-center">
-    <p class="uppercase tracking-[0.25em] text-xs text-brassdark font-medium mb-2">Kalkulator Faraid</p>
-    <h1 class="font-serif font-semibold text-3xl sm:text-4xl text-ink">Kira Asal Masalah</h1>
+  <header class="relative max-w-5xl mx-auto px-6 pt-12 pb-6 text-center">
+    <button
+      id="theme-toggle"
+      type="button"
+      aria-label="Tukar tema gelap"
+      aria-pressed="false"
+      class="absolute top-4 right-4 sm:top-6 sm:right-6 p-2.5 rounded-sm text-ink dark:text-ink-dark bg-card dark:bg-card-dark border border-ink/20 dark:border-ink-dark/20 hover:border-brass dark:hover:border-brass-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass dark:focus-visible:outline-brass-dark transition"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 block dark:hidden">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 hidden dark:block">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+      </svg>
+    </button>
+    <p class="uppercase tracking-[0.25em] text-xs text-brassdark dark:text-brassdark-dark font-medium mb-2">Kalkulator Faraid</p>
+    <h1 class="font-serif font-semibold text-3xl sm:text-4xl text-ink dark:text-ink-dark">Kira Asal Masalah</h1>
     <div class="double-rule w-24 mx-auto mt-4 mb-3"></div>
-    <p class="text-inkfaint text-sm max-w-md mx-auto">Kalkulator faktor sepunya (FST) dan asal masalah (GSTK) untuk pengiraan faraid.</p>
+    <p class="text-inkfaint dark:text-inkfaint-dark text-sm max-w-md mx-auto">Kalkulator faktor sepunya (FST) dan asal masalah (GSTK) untuk pengiraan faraid.</p>
   </header>
 
   <!-- ===== Main grid: two calculation cards ===== -->
@@ -105,14 +162,14 @@
     <section class="flex flex-col gap-4">
       <div class="ledger-card rounded-sm p-6 sm:p-7">
         <div class="flex items-baseline gap-2 mb-1">
-          <span class="font-serif text-brass font-semibold text-sm">I.</span>
-          <h2 class="font-serif font-semibold text-xl text-ink">Faktor Sepunya</h2>
+          <span class="font-serif text-brass dark:text-brass-dark font-semibold text-sm">I.</span>
+          <h2 class="font-serif font-semibold text-xl text-ink dark:text-ink-dark">Faktor Sepunya</h2>
         </div>
-        <p class="text-inkfaint text-xs mb-5">Cari faktor bagi dua nilai menggunakan gandaan sepunya terbesar (FST).</p>
+        <p class="text-inkfaint dark:text-inkfaint-dark text-xs mb-5">Cari faktor bagi dua nilai menggunakan gandaan sepunya terbesar (FST).</p>
 
         <div class="grid grid-cols-2 gap-4 mb-2">
           <div>
-            <label for="c1-nilai1" class="block text-xs font-medium text-inkfaint mb-1.5">Nilai 1 (<abbr title="Si Mati">SM</abbr>)</label>
+            <label for="c1-nilai1" class="block text-xs font-medium text-inkfaint dark:text-inkfaint-dark mb-1.5">Nilai 1 (<abbr title="Si Mati">SM</abbr>)</label>
             <input
               id="c1-nilai1"
               type="number"
@@ -120,11 +177,11 @@
               min="1"
               step="1"
               placeholder="cth: 14"
-              class="w-full rounded-sm border border-ink/20 bg-white px-3 py-2.5 text-ink font-mono text-sm focus:border-brass focus:ring-1 focus:ring-brass outline-none transition"
+              class="w-full rounded-sm border border-ink/20 dark:border-ink-dark/20 bg-white dark:bg-card-dark px-3 py-2.5 text-ink dark:text-ink-dark font-mono text-sm focus:border-brass dark:focus:border-brass-dark focus:ring-1 focus:ring-brass dark:focus:ring-brass-dark outline-none transition"
             />
           </div>
           <div>
-            <label for="c1-nilai2" class="block text-xs font-medium text-inkfaint mb-1.5">Nilai 2</label>
+            <label for="c1-nilai2" class="block text-xs font-medium text-inkfaint dark:text-inkfaint-dark mb-1.5">Nilai 2</label>
             <input
               id="c1-nilai2"
               type="number"
@@ -132,37 +189,37 @@
               min="1"
               step="1"
               placeholder="cth: 192"
-              class="w-full rounded-sm border border-ink/20 bg-white px-3 py-2.5 text-ink font-mono text-sm focus:border-brass focus:ring-1 focus:ring-brass outline-none transition"
+              class="w-full rounded-sm border border-ink/20 dark:border-ink-dark/20 bg-white dark:bg-card-dark px-3 py-2.5 text-ink dark:text-ink-dark font-mono text-sm focus:border-brass dark:focus:border-brass-dark focus:ring-1 focus:ring-brass dark:focus:ring-brass-dark outline-none transition"
             />
           </div>
         </div>
 
-        <p id="c1-error" class="text-err text-xs mb-2 hidden"></p>
+        <p id="c1-error" class="text-err dark:text-err-dark text-xs mb-2 hidden"></p>
 
         <button
           id="c1-btn"
-          class="w-full bg-ink hover:bg-ink/90 active:bg-ink text-paper text-sm font-medium py-2.5 rounded-sm transition mb-5 mt-2"
+          class="w-full bg-ink dark:bg-ink-dark hover:bg-ink/90 dark:hover:bg-ink-dark/90 active:bg-ink dark:active:bg-ink-dark text-paper dark:text-paper-dark text-sm font-medium py-2.5 rounded-sm transition mb-5 mt-2"
         >
           Kira Faktor
         </button>
 
         <!-- Results -->
         <div class="grid grid-cols-2 gap-4">
-          <div class="bg-highlight/60 rounded-sm px-3 py-3 text-center">
-            <p id="c1-hasil1" class="font-mono text-xl font-bold text-ink">—</p>
-            <p class="text-[11px] text-inkfaint mt-1">Faktor 1</p>
+          <div class="bg-highlight/60 dark:bg-highlight-dark/60 rounded-sm px-3 py-3 text-center">
+            <p id="c1-hasil1" class="font-mono text-xl font-bold text-ink dark:text-ink-dark">—</p>
+            <p class="text-[11px] text-inkfaint dark:text-inkfaint-dark mt-1">Faktor 1</p>
           </div>
-          <div class="bg-highlight/60 rounded-sm px-3 py-3 text-center">
-            <p id="c1-hasil2" class="font-mono text-xl font-bold text-ink">—</p>
-            <p class="text-[11px] text-inkfaint mt-1">Faktor 2</p>
+          <div class="bg-highlight/60 dark:bg-highlight-dark/60 rounded-sm px-3 py-3 text-center">
+            <p id="c1-hasil2" class="font-mono text-xl font-bold text-ink dark:text-ink-dark">—</p>
+            <p class="text-[11px] text-inkfaint dark:text-inkfaint-dark mt-1">Faktor 2</p>
           </div>
         </div>
       </div>
 
       <!-- History card for Kalkulator I -->
       <div class="ledger-card rounded-sm p-5">
-        <p class="text-[11px] uppercase tracking-wider text-brassdark font-medium mb-3">Sejarah Pengiraan</p>
-        <ul id="c1-history" class="text-sm font-mono text-ink/80 divide-y divide-ink/10">
+        <p class="text-[11px] uppercase tracking-wider text-brassdark dark:text-brassdark-dark font-medium mb-3">Sejarah Pengiraan</p>
+        <ul id="c1-history" class="text-sm font-mono text-ink/80 dark:text-ink-dark/80 divide-y divide-ink/10 dark:divide-ink-dark/10">
           <!-- Populated by main.js -->
         </ul>
       </div>
@@ -172,72 +229,72 @@
     <section class="flex flex-col gap-4">
       <div class="ledger-card rounded-sm p-6 sm:p-7">
         <div class="flex items-baseline gap-2 mb-1">
-          <span class="font-serif text-brass font-semibold text-sm">II.</span>
-          <h2 class="font-serif font-semibold text-xl text-ink">Asal Masalah</h2>
+          <span class="font-serif text-brass dark:text-brass-dark font-semibold text-sm">II.</span>
+          <h2 class="font-serif font-semibold text-xl text-ink dark:text-ink-dark">Asal Masalah</h2>
         </div>
-        <p class="text-inkfaint text-xs mb-5">Cari asal masalah akhir menggunakan gandaan sepunya terkecil (GSTK) dan baki bahagian waris asabah.</p>
+        <p class="text-inkfaint dark:text-inkfaint-dark text-xs mb-5">Cari asal masalah akhir menggunakan gandaan sepunya terkecil (GSTK) dan baki bahagian waris asabah.</p>
 
         <div class="mb-4">
-          <label for="c2-nisbah" class="block text-xs font-medium text-inkfaint mb-1.5">Nisbah Waris</label>
+          <label for="c2-nisbah" class="block text-xs font-medium text-inkfaint dark:text-inkfaint-dark mb-1.5">Nisbah Waris</label>
           <input
             id="c2-nisbah"
             type="text"
             placeholder="cth: 1/6, 1/8"
-            class="w-full rounded-sm border border-ink/20 bg-white px-3 py-2.5 text-ink font-mono text-sm focus:border-brass focus:ring-1 focus:ring-brass outline-none transition"
+            class="w-full rounded-sm border border-ink/20 dark:border-ink-dark/20 bg-white dark:bg-card-dark px-3 py-2.5 text-ink dark:text-ink-dark font-mono text-sm focus:border-brass dark:focus:border-brass-dark focus:ring-1 focus:ring-brass dark:focus:ring-brass-dark outline-none transition"
           />
-          <p class="text-[11px] text-inkfaint mt-1.5">Dipisahkan dengan koma.</p>
+          <p class="text-[11px] text-inkfaint dark:text-inkfaint-dark mt-1.5">Dipisahkan dengan koma.</p>
         </div>
 
         <div class="mb-2">
-          <label for="c2-waris" class="block text-xs font-medium text-inkfaint mb-1.5">Bahagian Waris Asabah (Baki)</label>
+          <label for="c2-waris" class="block text-xs font-medium text-inkfaint dark:text-inkfaint-dark mb-1.5">Bahagian Waris Asabah (Baki)</label>
           <input
             id="c2-waris"
             type="text"
             placeholder="cth: 8  atau  2, 2, 1, 1"
-            class="w-full rounded-sm border border-ink/20 bg-white px-3 py-2.5 text-ink font-mono text-sm focus:border-brass focus:ring-1 focus:ring-brass outline-none transition"
+            class="w-full rounded-sm border border-ink/20 dark:border-ink-dark/20 bg-white dark:bg-card-dark px-3 py-2.5 text-ink dark:text-ink-dark font-mono text-sm focus:border-brass dark:focus:border-brass-dark focus:ring-1 focus:ring-brass dark:focus:ring-brass-dark outline-none transition"
           />
-          <p class="text-[11px] text-inkfaint mt-1.5">Masukkan jumlah terus (cth: <span class="font-mono">8</span>), atau senarai pemberat dipisahkan dengan koma (cth: anak lelaki=2, anak perempuan=1 → <span class="font-mono">2,2,1,1</span>) — akan dijumlahkan secara automatik.</p>
+          <p class="text-[11px] text-inkfaint dark:text-inkfaint-dark mt-1.5">Masukkan jumlah terus (cth: <span class="font-mono">8</span>), atau senarai pemberat dipisahkan dengan koma (cth: anak lelaki=2, anak perempuan=1 → <span class="font-mono">2,2,1,1</span>) — akan dijumlahkan secara automatik.</p>
         </div>
 
-        <p id="c2-error" class="text-err text-xs mb-2 hidden"></p>
+        <p id="c2-error" class="text-err dark:text-err-dark text-xs mb-2 hidden"></p>
 
         <button
           id="c2-btn"
-          class="w-full bg-ink hover:bg-ink/90 active:bg-ink text-paper text-sm font-medium py-2.5 rounded-sm transition mb-5 mt-2"
+          class="w-full bg-ink dark:bg-ink-dark hover:bg-ink/90 dark:hover:bg-ink-dark/90 active:bg-ink dark:active:bg-ink-dark text-paper dark:text-paper-dark text-sm font-medium py-2.5 rounded-sm transition mb-5 mt-2"
         >
           Kira Asal Masalah
         </button>
 
         <!-- Step-by-step results -->
         <div class="space-y-2 mb-4">
-          <div class="flex items-center justify-between bg-white border border-ink/10 rounded-sm px-3 py-2">
-            <span class="text-xs text-inkfaint">Asas GSTK</span>
-            <span id="c2-lcm" class="font-mono text-sm font-semibold text-ink">—</span>
+          <div class="flex items-center justify-between bg-white dark:bg-card-dark border border-ink/10 dark:border-ink-dark/10 rounded-sm px-3 py-2">
+            <span class="text-xs text-inkfaint dark:text-inkfaint-dark">Asas GSTK</span>
+            <span id="c2-lcm" class="font-mono text-sm font-semibold text-ink dark:text-ink-dark">—</span>
           </div>
-          <div class="flex items-center justify-between bg-white border border-ink/10 rounded-sm px-3 py-2">
-            <span class="text-xs text-inkfaint">Digunakan (nisbah × asas)</span>
-            <span id="c2-used" class="font-mono text-sm font-semibold text-ink">—</span>
+          <div class="flex items-center justify-between bg-white dark:bg-card-dark border border-ink/10 dark:border-ink-dark/10 rounded-sm px-3 py-2">
+            <span class="text-xs text-inkfaint dark:text-inkfaint-dark">Digunakan (nisbah × asas)</span>
+            <span id="c2-used" class="font-mono text-sm font-semibold text-ink dark:text-ink-dark">—</span>
           </div>
-          <div class="flex items-center justify-between bg-white border border-ink/10 rounded-sm px-3 py-2">
-            <span class="text-xs text-inkfaint">Baki Unit</span>
-            <span id="c2-remain" class="font-mono text-sm font-semibold text-ink">—</span>
+          <div class="flex items-center justify-between bg-white dark:bg-card-dark border border-ink/10 dark:border-ink-dark/10 rounded-sm px-3 py-2">
+            <span class="text-xs text-inkfaint dark:text-inkfaint-dark">Baki Unit</span>
+            <span id="c2-remain" class="font-mono text-sm font-semibold text-ink dark:text-ink-dark">—</span>
           </div>
-          <div class="flex items-center justify-between bg-white border border-ink/10 rounded-sm px-3 py-2">
-            <span class="text-xs text-inkfaint">Bahagian Waris Asabah</span>
-            <span id="c2-heircount" class="font-mono text-sm font-semibold text-ink">—</span>
+          <div class="flex items-center justify-between bg-white dark:bg-card-dark border border-ink/10 dark:border-ink-dark/10 rounded-sm px-3 py-2">
+            <span class="text-xs text-inkfaint dark:text-inkfaint-dark">Bahagian Waris Asabah</span>
+            <span id="c2-heircount" class="font-mono text-sm font-semibold text-ink dark:text-ink-dark">—</span>
           </div>
         </div>
 
-        <div class="bg-highlight/60 rounded-sm px-3 py-4 text-center">
-          <p id="c2-final" class="font-mono text-2xl font-bold text-ink">—</p>
-          <p class="text-[11px] text-inkfaint mt-1">Asal Masalah Akhir</p>
+        <div class="bg-highlight/60 dark:bg-highlight-dark/60 rounded-sm px-3 py-4 text-center">
+          <p id="c2-final" class="font-mono text-2xl font-bold text-ink dark:text-ink-dark">—</p>
+          <p class="text-[11px] text-inkfaint dark:text-inkfaint-dark mt-1">Asal Masalah Akhir</p>
         </div>
       </div>
 
       <!-- History card for Kalkulator II -->
       <div class="ledger-card rounded-sm p-5">
-        <p class="text-[11px] uppercase tracking-wider text-brassdark font-medium mb-3">Sejarah Pengiraan</p>
-        <ul id="c2-history" class="text-sm font-mono text-ink/80 divide-y divide-ink/10">
+        <p class="text-[11px] uppercase tracking-wider text-brassdark dark:text-brassdark-dark font-medium mb-3">Sejarah Pengiraan</p>
+        <ul id="c2-history" class="text-sm font-mono text-ink/80 dark:text-ink-dark/80 divide-y divide-ink/10 dark:divide-ink-dark/10">
           <!-- Populated by main.js -->
         </ul>
       </div>
@@ -245,15 +302,15 @@
 
   </main>
 
-  <div class="text-left px-6 pb-12 text-[11px] text-inkfaint space-y-1">
+  <div class="text-left px-6 pb-12 text-[11px] text-inkfaint dark:text-inkfaint-dark space-y-1">
     <p>* Sejarah pengiraan disimpan secara tempatan di pelayar anda sahaja.</p>
     <p>* Kalkulator ini tidak mengambil kira kes berkaitan 'Aul.</p>
     <p>* Kalkulator ini adalah alat bantuan pengiraan sahaja. Sila rujuk ahli syariah untuk pengesahan.</p>
   </div>
 
-  <footer class="text-center px-6 pb-10 text-[12px] text-inkfaint">
+  <footer class="text-center px-6 pb-10 text-[12px] text-inkfaint dark:text-inkfaint-dark">
     &copy; 2026 Dibina oleh Atif Mustaffa • MIT License • <a
-    class="text-inkfaint underline"
+    class="text-inkfaint dark:text-inkfaint-dark underline"
     href="https://github.com/atifmustaffa/kalkulator-faraid"
     rel="noopener noreferrer">GitHub</a>
   </footer>
